@@ -63,6 +63,9 @@ static bool hasDarkenedScreen = false;
 // OrionSoft: Added an embedded tiny 8x8 font instead of relying on a larger BIOS font (not sure that the address used worked with every bios)
 extern uint8_t _binary_font8x8_bin_start[];
 
+// Location is hardcoded at the end of unused kernel space to make sure the original function address is valid so the hook can be uninstalled
+static uint32_t	*p_UnresolvedExceptionOld = (uint32_t *)0x8000DF78;
+
 static void DarkenScreen() {
     *GP1 = 0x01000000; // clear command buffer
     *GP1 = 0x04000000; // disable DMA
@@ -256,4 +259,5 @@ static void (** const a0table)() = (void (**)())0x200;
 void InstallExceptionHandler() {
     oldHandler = a0table[0x40];
     a0table[0x40] = UnresolvedException;
+    *p_UnresolvedExceptionOld = (uint32_t)UnresolvedException;
 }
